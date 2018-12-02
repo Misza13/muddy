@@ -229,7 +229,9 @@ class MudWindowSession:
         elif key == 27:
             key = self.screen.getch()
             self._escape_key_handler(key)
-        elif key <= 255:
+        elif key == -1:
+            pass
+        elif key >=0 and key <= 255:
             self.input.process_key(key)
         elif key == curses.KEY_PPAGE:
             self.main_window.scroll(-10)
