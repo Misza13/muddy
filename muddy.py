@@ -39,7 +39,7 @@ class MudProtocol(Telnet):
     def applicationDataReceived(self, data):
         data = data.decode()
         for line in data.split('\n'):
-            self.recv_handler(line)
+            self.recv_handler(line.strip('\r'))
 
     def sendData(self, data):
         data += '\n'
@@ -183,7 +183,7 @@ class MudWindowSession:
         self.input = InputWindow(x-2, y-2, 1, lambda t: self._input_handler(t))
 
     def main_loop(self):
-        f = MudClientFactory(lambda x: self.write_to_main_window(x))
+        f = MudClientFactory(lambda x: self._route_incoming_text(x))
         reactor.connectTCP('aardmud.org', 4000, f)
         def rrun():
             reactor.run(installSignalHandlers=0)
@@ -224,7 +224,17 @@ class MudWindowSession:
         self.input.resize(x-2, y-2, 1)
 
     def write_to_main_window(self, text):
-        self.main_window.add_text(text)
+        self._route_incoming_text(text)
+        self.input.redraw()
+    
+    def _route_incoming_text(self, text):
+        chat_rx = re.compile(r'^(\{chan ch=(?P<chan>.*?)\}|\{say\})(?P<text>.*)$')
+        chat_m = chat_rx.search(text)
+        if chat_m:
+            self.chat_window.add_text(chat_m['text'])
+        else:
+            self.main_window.add_text(text)
+        
         self.input.redraw()
 
     def _key_handler(self, key):
