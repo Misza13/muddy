@@ -38,8 +38,8 @@ class MudProtocol(Telnet):
 
     def applicationDataReceived(self, data):
         data = data.decode()
-        for line in data.split('\n'):
-            self.recv_handler(line.strip('\r'))
+        lines = [line.strip('\r') for line in data.split('\n')]
+        self.recv_handler(lines)
 
     def sendData(self, data):
         data += '\n'
@@ -228,12 +228,16 @@ class MudWindowSession:
         self.input.redraw()
     
     def _route_incoming_text(self, text):
-        chat_rx = re.compile(r'^(\{chan ch=(?P<chan>.*?)\}|\{say\})(?P<text>.*)$')
-        chat_m = chat_rx.search(text)
-        if chat_m:
-            self.chat_window.add_text(chat_m['text'])
-        else:
-            self.main_window.add_text(text)
+        if type(text) == str:
+            text = [text]
+        
+        for line in text:
+            chat_rx = re.compile(r'^(\{chan ch=(?P<chan>.*?)\}|\{say\})(?P<text>.*)$')
+            chat_m = chat_rx.search(line)
+            if chat_m:
+                self.chat_window.add_text(chat_m['text'])
+            else:
+                self.main_window.add_text(line)
         
         self.input.redraw()
 
