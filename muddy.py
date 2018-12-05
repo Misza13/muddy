@@ -1,3 +1,4 @@
+import time
 import sys
 import threading
 import zlib
@@ -173,17 +174,22 @@ class MudWindowSession:
         self.screen = screen
         self.screen.keypad(True)
         self.screen.scrollok(False)
+        
+        x_split = x * 2 // 3
 
-        self.main_window = BufferedTextWindow(y-4, x-2, 1, 1)
+        self.main_window = BufferedTextWindow(y-4, x_split-2, 1, 1)
+        self.chat_window = BufferedTextWindow(y-4, x-x_split-2, 1, x_split+1)
 
         self.input = InputWindow(x-2, y-2, 1, lambda t: self._input_handler(t))
 
     def main_loop(self):
         f = MudClientFactory(lambda x: self.write_to_main_window(x))
         reactor.connectTCP('aardmud.org', 4000, f)
-        r_thread = threading.Thread(target=reactor.run)
+        def rrun():
+            reactor.run(installSignalHandlers=0)
+        r_thread = threading.Thread(target=rrun)
         r_thread.start()
-
+        
         self.refresh_all()
         while app_running:
             key = self.screen.getch()
@@ -194,6 +200,8 @@ class MudWindowSession:
     def refresh_all(self):
         y, x = self.screen.getmaxyx()
         self.screen.clear()
+        
+        x_split = x * 2 // 3
 
         # Horizontal lines
         for x_b in range(x):
@@ -207,10 +215,12 @@ class MudWindowSession:
         # Vertical lines
         for y_b in range(1, y-1):
             self.screen.addch(y_b, 0, '#')
+            self.screen.addch(y_b, x_split-1, '#')
             self.screen.addch(y_b, x-1, '#')
 
         self.screen.refresh()
-        self.main_window.resize(y-4, x-2, 1, 1)
+        self.main_window.resize(y-4, x_split-2, 1, 1)
+        self.chat_window.resize(y-4, x-x_split-2, 1, x_split+1)
         self.input.resize(x-2, y-2, 1)
 
     def write_to_main_window(self, text):
