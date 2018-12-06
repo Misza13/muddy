@@ -38,30 +38,28 @@ class MudProtocol(Telnet):
 
 
 class MudClientFactory(ClientFactory):
-    def __init__(self, recv_handler, connection_keeper):
+    def __init__(self, recv_handler, conn_built_handler):
         self.recv_handler = recv_handler
-        self.connection_keeper = connection_keeper
+        self.conn_built_handler = conn_built_handler
 
     def buildProtocol(self, addr):
         proto = MudProtocol(self.recv_handler)
-        self.connection_keeper.register(proto)
+        self.conn_built_handler(proto)
 
         return proto
 
 
 class ConnectionKeeper:
     def __init__(self):
-        self.connections = []
+        self.connection = None
     
     def register(self, proto):
-        self.connections.append(proto)
+        self.connection = proto
     
-    #TODO: Use named connections
-    def disconnect_all(self):
-        for conn in self.connections:
-            conn.transport.loseConnection()
+    def disconnect(self):
+        if self.connection:
+            self.connection.transport.loseConnection()
     
-    #TODO: Use named connections
-    def send_all(self, data):
-        for conn in self.connections:
-            conn.sendData(data)
+    def send_data(self, data):
+        if self.connection:
+            self.connection.sendData(data)

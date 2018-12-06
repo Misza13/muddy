@@ -40,7 +40,9 @@ class MudWindowSession:
         self.app_running = True
 
     def main_loop(self):
-        f = MudClientFactory(lambda x: self._route_incoming_text(x), self.connection_keeper)
+        f = MudClientFactory(
+            lambda x: self._route_incoming_text(x),
+            lambda x: self._handle_connection_created(x))
         reactor.connectTCP('aardmud.org', 4000, f)
         def rrun():
             reactor.run(installSignalHandlers=0)
@@ -125,7 +127,7 @@ class MudWindowSession:
     def _escape_key_handler(self, key):
         if key == 113: #q
             self.app_running = False
-            self.connection_keeper.disconnect_all()
+            self.connection_keeper.disconnect()
             reactor.stop()
             return
 
@@ -133,7 +135,10 @@ class MudWindowSession:
 
     def _input_handler(self, input_text):
         self.write_to_main_window(input_text)
-        self.connection_keeper.send_all(input_text)
+        self.connection_keeper.send_data(input_text)
+    
+    def _handle_connection_created(self, proto):
+        self.connection_keeper.register(proto)
 
 
 def main(screen):
