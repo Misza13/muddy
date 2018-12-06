@@ -1,0 +1,1 @@
+*Muddy* is a terminal [MUD](https://en.wikipedia.org/wiki/MUD) client written in Python with emphasis on configurability, scriptability and automation.
