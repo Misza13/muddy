@@ -1,71 +1,18 @@
-import time
 import sys
 import threading
-import zlib
 import re
 
 import curses
 import curses.ascii as asc
 
-from twisted.internet.protocol import ClientFactory
-from twisted.conch.telnet import Telnet
 from twisted.internet import reactor
 
-
+from muddylib.telnet import MudProtocol, MudClientFactory, ConnectionKeeper
 from muddylib.windows import BufferedTextWindow, InputWindow
 
 
 app_running = True
 
-
-class MudProtocol(Telnet):
-    def __init__(self, recv_handler):
-        super().__init__()
-        self.recv_handler = recv_handler
-        self.decompress = zlib.decompressobj()
-        self.negotiationMap[b'V'] = lambda data: self.compression_negotiated(data)
-        self.compression_enabled = False
-
-    def telnet_WILL(self, option):
-        if option == b'V':
-            self.do(b'V')
-
-    def compression_negotiated(self, data):
-        self.compression_enabled = True
-
-    def dataReceived(self, data):
-        if self.compression_enabled:
-            data = self.decompress.decompress(data)
-
-        Telnet.dataReceived(self, data)
-
-    def applicationDataReceived(self, data):
-        data = data.decode()
-        lines = [line.strip('\r') for line in data.split('\n')]
-        self.recv_handler(lines)
-
-    def sendData(self, data):
-        data += '\n'
-        self.transport.write(data.encode('ascii'))
-
-    def connectionLost(self, reason):
-        self.recv_handler('Connection lost: ' + str(reason))
-
-
-clients = []
-
-
-class MudClientFactory(ClientFactory):
-    def __init__(self, recv_handler):
-        self.recv_handler = recv_handler
-
-    def buildProtocol(self, addr):
-        global clients
-
-        proto = MudProtocol(self.recv_handler)
-        clients.append(proto)
-
-        return proto
 
 
 class MudWindowSession:
@@ -91,9 +38,11 @@ class MudWindowSession:
         self.chat_window = BufferedTextWindow(y-4, x-x_split-2, 1, x_split+1)
 
         self.input = InputWindow(x-2, y-2, 1, lambda t: self._input_handler(t))
+        
+        self.connection_keeper = ConnectionKeeper()
 
     def main_loop(self):
-        f = MudClientFactory(lambda x: self._route_incoming_text(x))
+        f = MudClientFactory(lambda x: self._route_incoming_text(x), self.connection_keeper)
         reactor.connectTCP('aardmud.org', 4000, f)
         def rrun():
             reactor.run(installSignalHandlers=0)
@@ -179,8 +128,7 @@ class MudWindowSession:
         if key == 113: #q
             global app_running
             app_running = False
-            global clients
-            clients[0].transport.loseConnection()
+            self.connection_keeper.disconnect_all()
             reactor.stop()
             return
 
@@ -188,7 +136,7 @@ class MudWindowSession:
 
     def _input_handler(self, input_text):
         self.write_to_main_window(input_text)
-        clients[0].sendData(input_text)
+        self.connection_keeper.send_all(input_text)
 
 
 def main(screen):
