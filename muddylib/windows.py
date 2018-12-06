@@ -91,6 +91,13 @@ class InputWindow:
         if key == asc.NL:
             self.input_handler(self.input_buffer)
             self.input_buffer = ''
-        else:
+        elif key == curses.KEY_BACKSPACE:
+            if self.input_buffer:
+                self.input_buffer = self.input_buffer[:-1]
+        elif key >= 0 and key < 256:
             self.input_buffer += chr(key)
+        else:
+            return False
+        
         self.redraw()
+        return True

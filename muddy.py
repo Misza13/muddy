@@ -152,9 +152,9 @@ class MudWindowSession:
         self.input.redraw()
 
     def _key_handler(self, key):
-        if key == asc.NL and self.last_key == asc.NL:
-            self.last_key = None
-            return
+        #if key == asc.NL and self.last_key == asc.NL:
+        #    self.last_key = None
+        #    return
 
         self.last_key = key
 
@@ -165,8 +165,6 @@ class MudWindowSession:
             self._escape_key_handler(key)
         elif key == -1:
             pass
-        elif key >=0 and key <= 255:
-            self.input.process_key(key)
         elif key == curses.KEY_PPAGE:
             self.main_window.scroll(-10)
             self.input.redraw()
@@ -174,7 +172,8 @@ class MudWindowSession:
             self.main_window.scroll(10)
             self.input.redraw()
         else:
-            self.write_to_main_window('Unsupported key: ' + str(key))
+            if not self.input.process_key(key):
+                self.write_to_main_window('Unhandled key: ' + str(key))
 
     def _escape_key_handler(self, key):
         if key == 113: #q
@@ -185,7 +184,7 @@ class MudWindowSession:
             reactor.stop()
             return
 
-        self.write_to_main_window('Alt key: ' + str(key))
+        self.write_to_main_window('Unhandled escape key: ' + str(key))
 
     def _input_handler(self, input_text):
         self.write_to_main_window(input_text)
