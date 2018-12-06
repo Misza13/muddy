@@ -11,10 +11,6 @@ from muddylib.telnet import MudProtocol, MudClientFactory, ConnectionKeeper
 from muddylib.windows import BufferedTextWindow, InputWindow
 
 
-app_running = True
-
-
-
 class MudWindowSession:
     def __init__(self, screen):
         self.last_key = None
@@ -40,6 +36,8 @@ class MudWindowSession:
         self.input = InputWindow(x-2, y-2, 1, lambda t: self._input_handler(t))
         
         self.connection_keeper = ConnectionKeeper()
+        
+        self.app_running = True
 
     def main_loop(self):
         f = MudClientFactory(lambda x: self._route_incoming_text(x), self.connection_keeper)
@@ -50,7 +48,7 @@ class MudWindowSession:
         r_thread.start()
         
         self.refresh_all()
-        while app_running:
+        while self.app_running:
             key = self.screen.getch()
             self._key_handler(key)
 
@@ -126,8 +124,7 @@ class MudWindowSession:
 
     def _escape_key_handler(self, key):
         if key == 113: #q
-            global app_running
-            app_running = False
+            self.app_running = False
             self.connection_keeper.disconnect_all()
             reactor.stop()
             return
