@@ -109,7 +109,7 @@ class MudWindowSession:
 
         if key == curses.KEY_RESIZE:
             self.refresh_all()
-        elif key == 27:
+        elif key == asc.ESC:
             key = self.screen.getch()
             self._escape_key_handler(key)
         elif key == -1:
@@ -125,7 +125,7 @@ class MudWindowSession:
                 self.write_to_main_window('Unhandled key: ' + str(key))
 
     def _escape_key_handler(self, key):
-        if key == 113: #q
+        if key == ord('q'):
             self.app_running = False
             self.connection_keeper.disconnect()
             reactor.stop()
