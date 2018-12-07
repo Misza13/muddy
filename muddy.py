@@ -28,10 +28,10 @@ class MudWindowSession:
         
         x_split = x * 2 // 3
 
-        self.main_window = BufferedTextWindow(y-4, x_split-2, 1, 1)
-        self.chat_window = BufferedTextWindow(y-4, x-x_split-2, 1, x_split+1)
+        self.main_window = BufferedTextWindow('Main', y-4, x_split-2, 1, 1)
+        self.chat_window = BufferedTextWindow('Chat', y-4, x-x_split-2, 1, x_split+1)
 
-        self.input = InputWindow(x-2, y-2, 1, lambda t: self._input_handler(t))
+        self.input = InputWindow('Input', x-2, y-2, 1, lambda t: self._input_handler(t))
         
         self.connection_keeper = ConnectionKeeper()
         
