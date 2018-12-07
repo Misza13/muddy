@@ -91,7 +91,7 @@ class InputWindow:
         if key == asc.NL:
             self.input_handler(self.input_buffer)
             self.input_buffer = ''
-        elif key == curses.KEY_BACKSPACE:
+        elif key == curses.KEY_BACKSPACE or key == asc.DEL:
             if self.input_buffer:
                 self.input_buffer = self.input_buffer[:-1]
         elif key >= 0 and key < 256:
