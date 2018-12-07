@@ -13,8 +13,6 @@ from muddylib.windows import BufferedTextWindow, InputWindow
 
 class MudWindowSession:
     def __init__(self, screen):
-        self.last_key = None
-
         curses.noecho()
         curses.cbreak()
 
@@ -101,12 +99,6 @@ class MudWindowSession:
         self.input.redraw()
 
     def _key_handler(self, key):
-        #if key == asc.NL and self.last_key == asc.NL:
-        #    self.last_key = None
-        #    return
-
-        self.last_key = key
-
         if key == curses.KEY_RESIZE:
             self.refresh_all()
         elif key == asc.ESC:
