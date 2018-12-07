@@ -3,9 +3,38 @@ import curses
 import curses.ascii as asc
 
 
-class BufferedTextWindow:
+class Window:
     def __init__(self, lines, columns, y, x):
-        self.window = curses.newwin(lines, columns, y, x)
+        self._lines = lines
+        self._columns = columns
+        self._y = y
+        self._x = x
+        self._window = curses.newwin(lines, columns, y, x)
+
+    @property
+    def lines(self):
+        return self._lines
+
+    @property
+    def columns(self):
+        return self._columns
+
+    @property
+    def y(self):
+        return self._y
+
+    @property
+    def x(self):
+        return self._x
+
+    @property
+    def window(self):
+        return self._window
+
+
+class BufferedTextWindow(Window):
+    def __init__(self, lines, columns, y, x):
+        super().__init__(lines, columns, y, x)
         self.window.scrollok(True)
         self.buffer = []
         self.buffer_pos = 0
@@ -71,9 +100,9 @@ class BufferedTextWindow:
         self.redraw()
 
 
-class InputWindow:
+class InputWindow(Window):
     def __init__(self, columns, y, x, input_handler):
-        self.window = curses.newwin(1, columns, y, x)
+        super().__init__(1, columns, y, x)
         self.input_buffer = ''
         self.input_handler = input_handler
 
