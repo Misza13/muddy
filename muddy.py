@@ -1,4 +1,3 @@
-import sys
 import threading
 import re
 import json
@@ -11,8 +10,7 @@ import curses.ascii as asc
 from twisted.internet import reactor
 
 from muddylib.screen import MudScreen
-from muddylib.telnet import MudProtocol, MudClientFactory, ConnectionKeeper
-from muddylib.windows import BufferedTextWindow, InputWindow
+from muddylib.telnet import MudClientFactory, ConnectionKeeper
 
 
 class MudWindowSession:
