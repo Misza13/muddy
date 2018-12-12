@@ -68,6 +68,33 @@ class Window(LayoutElement):
     def redraw(self):
         pass
 
+    def put_text(self, y, x, text):
+        self.window.move(y ,x)
+
+        pieces = re.split('\x1b\[(.*?)m', text)
+        color_piece = False
+        active_pair = None
+        for piece in pieces:
+            if color_piece:
+                if piece == '0':
+                    active_pair = None
+                else:
+                    color_num = 0
+                    colors = [int(c) for c in piece.split(';')]
+                    for color in colors:
+                        if color == 1: #bold/bright
+                            color_num += 8
+                        elif color >= 30 and color <= 37: # standard 8 colors
+                            color_num += color - 30
+                    active_pair = curses.color_pair(color_num+1)
+            else:
+                if active_pair:
+                    self.window.addstr(piece, active_pair)
+                else:
+                    self.window.addstr(piece)
+
+            color_piece = not color_piece
+
     def message_handler(self, topic=pub.AUTO_TOPIC, **kwargs):
         topic = topic.getName()
         if not '.' in topic:
@@ -98,33 +125,6 @@ class BufferedTextWindow(Window):
         self.put_text(y-1, 0, text)
         self.window.refresh()
 
-    def put_text(self, y, x, text):
-        self.window.move(y ,x)
-
-        pieces = re.split('\x1b\[(.*?)m', text)
-        color_piece = False
-        active_pair = None
-        for piece in pieces:
-            if color_piece:
-                if piece == '0':
-                    active_pair = None
-                else:
-                    color_num = 0
-                    colors = [int(c) for c in piece.split(';')]
-                    for color in colors:
-                        if color == 1: #bold/bright
-                            color_num += 8
-                        elif color >= 30 and color <= 37: # standard 8 colors
-                            color_num += color - 30
-                    active_pair = curses.color_pair(color_num+1)
-            else:
-                if active_pair:
-                    self.window.addstr(piece, active_pair)
-                else:
-                    self.window.addstr(piece)
-
-            color_piece = not color_piece
-
     def redraw(self):
         y, x = self.window.getmaxyx()
 
@@ -138,6 +138,23 @@ class BufferedTextWindow(Window):
 
     def scroll(self, num_rows):
         self.buffer_pos = max(self.buffer_pos - num_rows, 0)
+        self.redraw()
+
+
+class StaticWindow(Window):
+    def __init__(self):
+        super(StaticWindow, self).__init__()
+        self.window.scrollok(True)
+        self.buffer = []
+
+    def redraw(self):
+        self.window.clear()
+        for line in self.buffer:
+            self.window.addstr(line)
+        self.window.refresh()
+
+    def set_text(self, text):
+        self.buffer = text
         self.redraw()
 
 

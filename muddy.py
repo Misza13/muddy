@@ -60,9 +60,16 @@ class MudWindowSession:
             chat_m = chat_rx.search(line)
             if chat_m:
                 pub.sendMessage('ChatWindow.add_text', text=chat_m['text'])
-            else:
-                pub.sendMessage('MainWindow.add_text', text=line)
-        
+                continue
+
+            stats_rx = re.compile(r'^\{stats\}')
+            stats_m = stats_rx.search(line)
+            if stats_m:
+                pub.sendMessage('StatsWindow.set_text', text=[line])
+                continue
+
+            pub.sendMessage('MainWindow.add_text', text=line)
+
         pub.sendMessage('InputWindow.refresh')
 
     def _key_handler(self, key):

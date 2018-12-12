@@ -1,6 +1,6 @@
 import curses
 
-from muddylib.windows import BufferedTextWindow, InputWindow, LayoutElement
+from muddylib.windows import BufferedTextWindow, InputWindow, LayoutElement, StaticWindow
 
 
 class MudScreen(object):
@@ -199,6 +199,7 @@ class LayoutMaker:
         classes = [
             BufferedTextWindow,
             InputWindow,
+            StaticWindow,
             VerticalStackLayout,
             HorizontalStackLayout
         ]
