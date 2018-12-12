@@ -8,6 +8,10 @@ from pubsub import pub
 class Window(object):
     def __init__(self, name):
         self._name = name
+        self._lines = 1
+        self._columns = 1
+        self._x = 1
+        self._y = 1
         self._window = curses.newwin(1, 1, 1, 1)
         
         pub.subscribe(self.message_handler, name)
@@ -134,9 +138,6 @@ class InputWindow(Window):
         self.window.clear()
         self.window.addstr(self.input_buffer)
         self.window.refresh()
-
-    def resize(self, columns, y, x):
-        super(InputWindow, self).resize(1, columns, y, x)
 
     def process_key(self, key):
         if key == asc.NL:

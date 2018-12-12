@@ -68,6 +68,7 @@ class MudWindowSession:
     def _key_handler(self, key):
         if key == curses.KEY_RESIZE:
             self.mud_screen.refresh_all()
+            pub.sendMessage('InputWindow.refresh')
         elif key == asc.ESC:
             key = self.screen.getch()
             self._escape_key_handler(key)

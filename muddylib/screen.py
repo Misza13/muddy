@@ -9,30 +9,27 @@ class MudScreen(object):
         self.screen.keypad(True)
         self.screen.scrollok(False)
         
-        y, x = screen.getmaxyx()
-        x_split = x * 2 // 3
-
-        self.main_window = BufferedTextWindow('MainWindow')
-        self.chat_window = BufferedTextWindow('ChatWindow')
-
-        self.input = InputWindow('InputWindow')
+        main_window = BufferedTextWindow('MainWindow')
+        chat_window = BufferedTextWindow('ChatWindow')
+        input_window = InputWindow('InputWindow')
         
-        self.windows = [
-            self.main_window,
-            self.chat_window,
-            self.input
-            ]
+        winstack = HorizontalStackLayout()
+        winstack.add_child(main_window, '2*')
+        winstack.add_child(chat_window, '1*')
+
+        self.stack = VerticalStackLayout()
+        self.stack.add_child(winstack, '1*')
+        self.stack.add_child(input_window, '1')
+        
+        self.windows = [main_window, chat_window, input_window]
 
     def refresh_all(self):
         self.screen.clear()
 
         y, x = self.screen.getmaxyx()
         x = x-1 #Issue with curses - last column is not really supported
-        x_split = x * 2 // 3
-
-        self.main_window.resize(y-4, x_split-1, 1, 1)
-        self.chat_window.resize(y-4, x-x_split-2, 1, x_split+1)
-        self.input.resize(x-2, y-2, 1)
+        
+        self.stack.resize(y, x, 0, 0)
         
         pmap = PixMap(y, x)
         for win in self.windows:
@@ -111,3 +108,107 @@ def adjacency_to_char(adj):
         return curses.ACS_PLUS
     else:
         return '#'
+
+
+class AbstractStackLayout(object):
+    def __init__(self):
+        self._lines = 1
+        self._columns = 1
+        self._x = 1
+        self._y = 1
+        
+        self.elements = []
+        self.layouts = []
+        
+    @property
+    def lines(self):
+        return self._lines
+
+    @property
+    def columns(self):
+        return self._columns
+
+    @property
+    def y(self):
+        return self._y
+
+    @property
+    def x(self):
+        return self._x
+
+    def add_child(self, element, layout):
+        self.elements.append(element)
+        self.layouts.append(layout)
+
+
+class VerticalStackLayout(AbstractStackLayout):
+    def resize(self, lines, columns, y, x):
+        self._lines = lines
+        self._columns = columns
+        self._x = x
+        self._y = y
+        
+        actuals = [element.lines for element in self.elements]
+        new_lines = compute_layout(lines, self.layouts, actuals)
+        new_ys = cumsum_w_borders(new_lines)
+        
+        for e, element in enumerate(self.elements):
+            if type(element) in [VerticalStackLayout, HorizontalStackLayout]:
+                element.resize(new_lines[e]+2, columns, new_ys[e]-1, x)
+            else:
+                element.resize(new_lines[e], columns-2, new_ys[e], x+1)
+    
+
+class HorizontalStackLayout(AbstractStackLayout):
+    def resize(self, lines, columns, y, x):
+        self._lines = lines
+        self._columns = columns
+        self._x = x
+        self._y = y
+        
+        actuals = [element.columns for element in self.elements]
+        new_columns = compute_layout(columns, self.layouts, actuals)
+        new_xs = cumsum_w_borders(new_columns)
+        
+        for e, element in enumerate(self.elements):
+            if type(element) in [VerticalStackLayout, HorizontalStackLayout]:
+                element.resize(lines, new_columns[e]+2, y, new_xs[e]-1)
+            else:
+                element.resize(lines-2, new_columns[e], y+1, new_xs[e])
+
+
+def compute_layout(total, layouts, actuals):
+    unallocated = total - 1 #For border
+    new_lines = list(range(len(layouts)))
+    
+    total_props = 0
+    
+    for l, layout in enumerate(layouts):
+        unallocated -= 1 #For border
+        
+        if layout.isnumeric():
+            new_lines[l] = int(layout)
+            unallocated -= new_lines[l]
+        elif layout.endswith('*'):
+            total_props += int(layout[:-1])
+    
+    props_so_far = 0
+    for l, layout in enumerate(layouts):
+        if layout.endswith('*'):
+            prop = int(layout[:-1])
+            b = unallocated * (props_so_far+prop) // total_props
+            a = unallocated * props_so_far // total_props
+            new_lines[l] = b - a
+            props_so_far += prop
+    
+    return new_lines
+
+def cumsum_w_borders(arr):
+    result = []
+    sum = 1
+    
+    for elem in arr:
+        result.append(sum)
+        sum += elem + 1
+    
+    return result
