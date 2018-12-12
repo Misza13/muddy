@@ -1,6 +1,7 @@
 import sys
 import threading
 import re
+import json
 
 from pubsub import pub
 
@@ -24,7 +25,8 @@ class MudWindowSession:
             curses.init_pair(c+1, c, curses.COLOR_BLACK)
 
         self.screen = screen
-        self.mud_screen = MudScreen(screen)
+        screen_config = json.loads(open('config/aardwolf_windows.json', 'r').read())
+        self.mud_screen = MudScreen(screen, screen_config)
         
         self.connection_keeper = ConnectionKeeper()
         pub.subscribe(self._route_incoming_text, 'Core.telnet_received')

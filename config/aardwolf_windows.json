@@ -1,0 +1,28 @@
+{
+  "name": "aardwolf_windows",
+  "description": "Standard window setup for Aardwolf MUD",
+  "root": {
+    "type": "VerticalStackLayout",
+    "layouts": ["1*", "1"],
+    "elements": [
+      {
+        "type": "HorizontalStackLayout",
+        "layouts": ["2*", "1*"],
+        "elements": [
+          {
+            "type": "BufferedTextWindow",
+            "name": "MainWindow"
+          },
+          {
+            "type": "BufferedTextWindow",
+            "name": "ChatWindow"
+          }
+        ]
+      },
+      {
+        "type": "InputWindow",
+        "name": "InputWindow"
+      }
+    ]
+  }
+}

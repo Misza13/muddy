@@ -34,15 +34,15 @@ class LayoutElement(object):
         self._x = x
         self._y = y
 
+    def init_from_config(self, config):
+        raise NotImplementedError('Call of init_from_config() in base abstract class')
 
 
 class Window(LayoutElement):
-    def __init__(self, name):
+    def __init__(self):
         super(Window, self).__init__()
-        self._name = name
+        self._name = None
         self._window = curses.newwin(1, 1, 1, 1)
-        
-        pub.subscribe(self.message_handler, name)
 
     @property
     def name(self):
@@ -51,6 +51,12 @@ class Window(LayoutElement):
     @property
     def window(self):
         return self._window
+
+    def init_from_config(self, config):
+        self._name = config['name']
+        pub.subscribe(self.message_handler, self.name)
+
+        return [self]
     
     def resize(self, lines, columns, y, x):
         super(Window, self).resize(lines, columns, y, x)
@@ -73,8 +79,8 @@ class Window(LayoutElement):
 
 
 class BufferedTextWindow(Window):
-    def __init__(self, name):
-        super(BufferedTextWindow, self).__init__(name)
+    def __init__(self):
+        super(BufferedTextWindow, self).__init__()
         self.window.scrollok(True)
         self.buffer = []
         self.buffer_pos = 0
@@ -136,8 +142,8 @@ class BufferedTextWindow(Window):
 
 
 class InputWindow(Window):
-    def __init__(self, name):
-        super(InputWindow, self).__init__(name)
+    def __init__(self):
+        super(InputWindow, self).__init__()
         self.input_buffer = ''
 
     def refresh(self):

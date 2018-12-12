@@ -4,24 +4,15 @@ from muddylib.windows import BufferedTextWindow, InputWindow, LayoutElement
 
 
 class MudScreen(object):
-    def __init__(self, screen):
+    def __init__(self, screen, screen_config):
         self.screen = screen
         self.screen.keypad(True)
         self.screen.scrollok(False)
         
-        main_window = BufferedTextWindow('MainWindow')
-        chat_window = BufferedTextWindow('ChatWindow')
-        input_window = InputWindow('InputWindow')
-        
-        winstack = HorizontalStackLayout()
-        winstack.add_child(main_window, '2*')
-        winstack.add_child(chat_window, '1*')
-
-        self.stack = VerticalStackLayout()
-        self.stack.add_child(winstack, '1*')
-        self.stack.add_child(input_window, '1')
-        
-        self.windows = [main_window, chat_window, input_window]
+        maker = LayoutMaker()
+        root, windows = maker.make_from(screen_config['root'])
+        self.root = root
+        self.windows = windows
 
     def refresh_all(self):
         self.screen.clear()
@@ -29,7 +20,7 @@ class MudScreen(object):
         y, x = self.screen.getmaxyx()
         x = x-1 #Issue with curses - last column is not really supported
         
-        self.stack.resize(y, x, 0, 0)
+        self.root.resize(y, x, 0, 0)
         
         pmap = PixMap(y, x)
         for win in self.windows:
@@ -116,6 +107,20 @@ class AbstractStackLayout(LayoutElement):
         
         self.elements = []
         self.layouts = []
+
+    def init_from_config(self, config):
+        self.layouts = config['layouts']
+        self.elements = []
+
+        maker = LayoutMaker()
+        windows = []
+
+        for elem in config['elements']:
+            child, child_windows = maker.make_from(elem)
+            self.elements.append(child)
+            windows.extend(child_windows)
+
+        return windows
         
     def add_child(self, element, layout):
         self.elements.append(element)
@@ -187,3 +192,28 @@ def cumsum_w_borders(arr):
         sum += elem + 1
     
     return result
+
+
+class LayoutMaker:
+    def __init__(self):
+        classes = [
+            BufferedTextWindow,
+            InputWindow,
+            VerticalStackLayout,
+            HorizontalStackLayout
+        ]
+
+        self._class_map = {}
+        for cls in classes:
+            self._class_map[cls.__name__] = cls
+
+    def make_from(self, config):
+        elem_type = config['type']
+
+        if not elem_type in self._class_map:
+            raise ValueError('Unsupported layout element type', elem_type)
+
+        root = self._class_map[elem_type]()
+        windows = root.init_from_config(config)
+
+        return root, windows
