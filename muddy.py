@@ -86,7 +86,7 @@ class MudWindowSession:
 
     def write_to_main_window(self, text):
         pub.sendMessage('MainWindow.add_text', text=text)
-        self.input.redraw()
+        pub.sendMessage('InputWindow.refresh')
     
     def _route_incoming_text(self, text):
         if type(text) == str:
@@ -100,7 +100,7 @@ class MudWindowSession:
             else:
                 pub.sendMessage('MainWindow.add_text', text=line)
         
-        self.input.redraw()
+        pub.sendMessage('InputWindow.refresh')
 
     def _key_handler(self, key):
         if key == curses.KEY_RESIZE:
@@ -111,14 +111,13 @@ class MudWindowSession:
         elif key == -1:
             pass
         elif key == curses.KEY_PPAGE:
-            self.main_window.scroll(-10)
-            self.input.redraw()
+            pub.sendMessage('MainWindow.scroll', num_rows=-10)
+            pub.sendMessage('InputWindow.refresh')
         elif key == curses.KEY_NPAGE:
-            self.main_window.scroll(10)
-            self.input.redraw()
+            pub.sendMessage('MainWindow.scroll', num_rows=10)
+            pub.sendMessage('InputWindow.refresh')
         else:
-            if not self.input.process_key(key):
-                self.write_to_main_window('\x1b[36;1mUnhandled key: ' + str(key) + '\x1b[0m')
+            pub.sendMessage('InputWindow.process_key', key=key)
 
     def _escape_key_handler(self, key):
         if key == ord('q'):

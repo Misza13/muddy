@@ -123,6 +123,9 @@ class InputWindow(Window):
         super().__init__(name, 1, columns, y, x)
         self.input_buffer = ''
 
+    def refresh(self):
+        self.window.refresh()
+
     def redraw(self):
         self.window.clear()
         self.window.addstr(self.input_buffer)
@@ -143,7 +146,8 @@ class InputWindow(Window):
         elif key >= 0 and key < 256:
             self.input_buffer += chr(key)
         else:
-            return False
+            pub.sendMessage('MainWindow.add_text', text='\x1b[36;1mUnhandled key: ' + str(key) + '\x1b[0m')
+            self.refresh()
+            return
         
         self.redraw()
-        return True
