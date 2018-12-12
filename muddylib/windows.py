@@ -44,7 +44,7 @@ class Window(object):
         
         self.window.resize(lines, columns)
         self.window.mvwin(y, x)
-        self.redraw()
+        #self.redraw()
     
     def redraw(self):
         pass
