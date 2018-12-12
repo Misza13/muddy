@@ -7,9 +7,8 @@ from twisted.conch.telnet import Telnet
 
 
 class MudProtocol(Telnet):
-    def __init__(self, recv_handler):
+    def __init__(self):
         super().__init__()
-        self.recv_handler = recv_handler
         self.decompress = zlib.decompressobj()
         self.negotiationMap[b'V'] = lambda data: self.compression_negotiated(data)
         self.compression_enabled = False
@@ -41,12 +40,11 @@ class MudProtocol(Telnet):
 
 
 class MudClientFactory(ClientFactory):
-    def __init__(self, recv_handler, conn_built_handler):
-        self.recv_handler = recv_handler
+    def __init__(self, conn_built_handler):
         self.conn_built_handler = conn_built_handler
 
     def buildProtocol(self, addr):
-        proto = MudProtocol(self.recv_handler)
+        proto = MudProtocol()
         self.conn_built_handler(proto)
 
         return proto

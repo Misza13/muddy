@@ -42,9 +42,7 @@ class MudWindowSession:
         self.app_running = True
 
     def main_loop(self):
-        f = MudClientFactory(
-            lambda x: self._route_incoming_text(x),
-            lambda x: self._handle_connection_created(x))
+        f = MudClientFactory(lambda x: self._handle_connection_created(x))
         reactor.connectTCP('aardmud.org', 4000, f)
         def rrun():
             reactor.run(installSignalHandlers=0)
