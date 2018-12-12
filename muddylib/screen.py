@@ -44,6 +44,7 @@ class MudScreen(object):
                     try:
                         self.screen.addch(yy, xx, adjacency_to_char(pmap.get_adjacency(yy, xx)))
                     except:
+                        #This empty catch is a curses workaround
                         pass
 
         self.screen.refresh()
@@ -86,8 +87,6 @@ class PixMap:
                8 * self.get_state(y, x-1)
 
 def adjacency_to_char(adj):
-    #return '0123456789ABCDEF'[adj]
-    
     if adj == 1 or adj == 4 or adj == 1+4:
         return curses.ACS_VLINE
     elif adj == 2 or adj == 8 or adj == 2+8:
@@ -111,5 +110,4 @@ def adjacency_to_char(adj):
     elif adj == 1+2+4+8:
         return curses.ACS_PLUS
     else:
-        return '0123456789ABCDEF'[adj]
-        #return '#'
+        return '#'
