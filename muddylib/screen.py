@@ -1,7 +1,7 @@
 from muddylib.windows import BufferedTextWindow, InputWindow
 
 
-class MudScreen:
+class MudScreen(object):
     def __init__(self, screen):
         self.screen = screen
         self.screen.keypad(True)
@@ -10,10 +10,10 @@ class MudScreen:
         y, x = screen.getmaxyx()
         x_split = x * 2 // 3
 
-        self.main_window = BufferedTextWindow('MainWindow', 1, 1, 1, 1)
-        self.chat_window = BufferedTextWindow('ChatWindow', 1, 1, 1, 1)
+        self.main_window = BufferedTextWindow('MainWindow')
+        self.chat_window = BufferedTextWindow('ChatWindow')
 
-        self.input = InputWindow('InputWindow', 1, 1, 1)
+        self.input = InputWindow('InputWindow')
 
     def refresh_all(self):
         self.screen.clear()

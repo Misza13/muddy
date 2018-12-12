@@ -5,14 +5,10 @@ import curses.ascii as asc
 from pubsub import pub
 
 
-class Window:
-    def __init__(self, name, lines, columns, y, x):
+class Window(object):
+    def __init__(self, name):
         self._name = name
-        self._lines = lines
-        self._columns = columns
-        self._y = y
-        self._x = x
-        self._window = curses.newwin(lines, columns, y, x)
+        self._window = curses.newwin(1, 1, 1, 1)
         
         pub.subscribe(self.message_handler, name)
 
@@ -40,6 +36,19 @@ class Window:
     def window(self):
         return self._window
     
+    def resize(self, lines, columns, y, x):
+        self._lines = lines
+        self._columns = columns
+        self._x = x
+        self._y = y
+        
+        self.window.resize(lines, columns)
+        self.window.mvwin(y, x)
+        self.redraw()
+    
+    def redraw(self):
+        pass
+
     def message_handler(self, topic=pub.AUTO_TOPIC, **kwargs):
         topic = topic.getName()
         if not '.' in topic:
@@ -51,8 +60,8 @@ class Window:
 
 
 class BufferedTextWindow(Window):
-    def __init__(self, name, lines, columns, y, x):
-        super().__init__(name, lines, columns, y, x)
+    def __init__(self, name):
+        super(BufferedTextWindow, self).__init__(name)
         self.window.scrollok(True)
         self.buffer = []
         self.buffer_pos = 0
@@ -108,19 +117,14 @@ class BufferedTextWindow(Window):
                 self.put_text(l, 0, self.buffer[first_row+l])
         self.window.refresh()
 
-    def resize(self, lines, columns, y, x):
-        self.window.resize(lines, columns)
-        self.window.mvwin(y, x)
-        self.redraw()
-
     def scroll(self, num_rows):
         self.buffer_pos = max(self.buffer_pos - num_rows, 0)
         self.redraw()
 
 
 class InputWindow(Window):
-    def __init__(self, name, columns, y, x):
-        super().__init__(name, 1, columns, y, x)
+    def __init__(self, name):
+        super(InputWindow, self).__init__(name)
         self.input_buffer = ''
 
     def refresh(self):
@@ -132,9 +136,7 @@ class InputWindow(Window):
         self.window.refresh()
 
     def resize(self, columns, y, x):
-        self.window.resize(1, columns)
-        self.window.mvwin(y, x)
-        self.redraw()
+        super(InputWindow, self).resize(1, columns, y, x)
 
     def process_key(self, key):
         if key == asc.NL:
