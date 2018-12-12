@@ -5,20 +5,12 @@ import curses.ascii as asc
 from pubsub import pub
 
 
-class Window(object):
-    def __init__(self, name):
-        self._name = name
+class LayoutElement(object):
+    def __init__(self):
         self._lines = 1
         self._columns = 1
         self._x = 1
         self._y = 1
-        self._window = curses.newwin(1, 1, 1, 1)
-        
-        pub.subscribe(self.message_handler, name)
-
-    @property
-    def name(self):
-        return self._name
 
     @property
     def lines(self):
@@ -36,15 +28,32 @@ class Window(object):
     def x(self):
         return self._x
 
-    @property
-    def window(self):
-        return self._window
-    
     def resize(self, lines, columns, y, x):
         self._lines = lines
         self._columns = columns
         self._x = x
         self._y = y
+
+
+
+class Window(LayoutElement):
+    def __init__(self, name):
+        super(Window, self).__init__()
+        self._name = name
+        self._window = curses.newwin(1, 1, 1, 1)
+        
+        pub.subscribe(self.message_handler, name)
+
+    @property
+    def name(self):
+        return self._name
+
+    @property
+    def window(self):
+        return self._window
+    
+    def resize(self, lines, columns, y, x):
+        super(Window, self).resize(lines, columns, y, x)
         
         self.window.resize(lines, columns)
         self.window.mvwin(y, x)

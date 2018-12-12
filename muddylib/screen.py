@@ -1,6 +1,6 @@
 import curses
 
-from muddylib.windows import BufferedTextWindow, InputWindow
+from muddylib.windows import BufferedTextWindow, InputWindow, LayoutElement
 
 
 class MudScreen(object):
@@ -110,32 +110,13 @@ def adjacency_to_char(adj):
         return '#'
 
 
-class AbstractStackLayout(object):
+class AbstractStackLayout(LayoutElement):
     def __init__(self):
-        self._lines = 1
-        self._columns = 1
-        self._x = 1
-        self._y = 1
+        super(AbstractStackLayout, self).__init__()
         
         self.elements = []
         self.layouts = []
         
-    @property
-    def lines(self):
-        return self._lines
-
-    @property
-    def columns(self):
-        return self._columns
-
-    @property
-    def y(self):
-        return self._y
-
-    @property
-    def x(self):
-        return self._x
-
     def add_child(self, element, layout):
         self.elements.append(element)
         self.layouts.append(layout)
@@ -143,10 +124,7 @@ class AbstractStackLayout(object):
 
 class VerticalStackLayout(AbstractStackLayout):
     def resize(self, lines, columns, y, x):
-        self._lines = lines
-        self._columns = columns
-        self._x = x
-        self._y = y
+        super(VerticalStackLayout, self).resize(lines, columns, y, x)
         
         actuals = [element.lines for element in self.elements]
         new_lines = compute_layout(lines, self.layouts, actuals)
@@ -161,10 +139,7 @@ class VerticalStackLayout(AbstractStackLayout):
 
 class HorizontalStackLayout(AbstractStackLayout):
     def resize(self, lines, columns, y, x):
-        self._lines = lines
-        self._columns = columns
-        self._x = x
-        self._y = y
+        super(HorizontalStackLayout, self).resize(lines, columns, y, x)
         
         actuals = [element.columns for element in self.elements]
         new_columns = compute_layout(columns, self.layouts, actuals)
