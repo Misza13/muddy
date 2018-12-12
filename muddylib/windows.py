@@ -119,10 +119,9 @@ class BufferedTextWindow(Window):
 
 
 class InputWindow(Window):
-    def __init__(self, name, columns, y, x, input_handler):
+    def __init__(self, name, columns, y, x):
         super().__init__(name, 1, columns, y, x)
         self.input_buffer = ''
-        self.input_handler = input_handler
 
     def redraw(self):
         self.window.clear()
@@ -136,7 +135,7 @@ class InputWindow(Window):
 
     def process_key(self, key):
         if key == asc.NL:
-            self.input_handler(self.input_buffer)
+            pub.sendMessage('Core.user_input_received', input_text=self.input_buffer)
             self.input_buffer = ''
         elif key == curses.KEY_BACKSPACE or key == asc.DEL:
             if self.input_buffer:

@@ -33,10 +33,11 @@ class MudWindowSession:
         self.main_window = BufferedTextWindow('MainWindow', y-4, x_split-2, 1, 1)
         self.chat_window = BufferedTextWindow('ChatWindow', y-4, x-x_split-2, 1, x_split+1)
 
-        self.input = InputWindow('InputWindow', x-2, y-2, 1, lambda t: self._input_handler(t))
+        self.input = InputWindow('InputWindow', x-2, y-2, 1)
         
         self.connection_keeper = ConnectionKeeper()
         pub.subscribe(self._route_incoming_text, 'Core.telnet_received')
+        pub.subscribe(self._input_handler, 'Core.user_input_received')
         
         self.app_running = True
 
