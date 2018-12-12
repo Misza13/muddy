@@ -2,6 +2,8 @@ import sys
 import threading
 import re
 
+from pubsub import pub
+
 import curses
 import curses.ascii as asc
 
@@ -28,10 +30,10 @@ class MudWindowSession:
         
         x_split = x * 2 // 3
 
-        self.main_window = BufferedTextWindow('Main', y-4, x_split-2, 1, 1)
-        self.chat_window = BufferedTextWindow('Chat', y-4, x-x_split-2, 1, x_split+1)
+        self.main_window = BufferedTextWindow('MainWindow', y-4, x_split-2, 1, 1)
+        self.chat_window = BufferedTextWindow('ChatWindow', y-4, x-x_split-2, 1, x_split+1)
 
-        self.input = InputWindow('Input', x-2, y-2, 1, lambda t: self._input_handler(t))
+        self.input = InputWindow('InputWindow', x-2, y-2, 1, lambda t: self._input_handler(t))
         
         self.connection_keeper = ConnectionKeeper()
         
@@ -92,9 +94,9 @@ class MudWindowSession:
             chat_rx = re.compile(r'^(\{chan ch=(?P<chan>.*?)\}|\{say\})(?P<text>.*)$')
             chat_m = chat_rx.search(line)
             if chat_m:
-                self.chat_window.add_text(chat_m['text'])
+                pub.sendMessage('ChatWindow.add_text', text=chat_m['text'])
             else:
-                self.main_window.add_text(line)
+                pub.sendMessage('MainWindow.add_text', text=line)
         
         self.input.redraw()
 

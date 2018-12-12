@@ -2,6 +2,8 @@ import re
 import curses
 import curses.ascii as asc
 
+from pubsub import pub
+
 
 class Window:
     def __init__(self, name, lines, columns, y, x):
@@ -11,6 +13,8 @@ class Window:
         self._y = y
         self._x = x
         self._window = curses.newwin(lines, columns, y, x)
+        
+        pub.subscribe(self.message_handler, name)
 
     @property
     def name(self):
@@ -35,6 +39,15 @@ class Window:
     @property
     def window(self):
         return self._window
+    
+    def message_handler(self, topic=pub.AUTO_TOPIC, **kwargs):
+        topic = topic.getName()
+        if not '.' in topic:
+            return
+        
+        component_name, method_name = topic.split('.', 1)
+        if hasattr(self, method_name):
+            getattr(self, method_name)(**kwargs)
 
 
 class BufferedTextWindow(Window):

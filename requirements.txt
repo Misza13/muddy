@@ -1,1 +1,2 @@
 Twisted==18.9.0
+Pypubsub==4.0.0
