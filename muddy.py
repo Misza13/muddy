@@ -1,5 +1,4 @@
 import threading
-import re
 import json
 
 from pubsub import pub
@@ -12,9 +11,17 @@ from twisted.internet import reactor
 from muddylib.screen import MudScreen
 from muddylib.telnet import MudClientFactory, ConnectionKeeper
 
+from plugins.chat_router import ChatRouterPlugin
+
 
 class MudWindowSession:
     def __init__(self, screen):
+        self.plugin_registry = {
+            'IncomingTextHandler': []
+        }
+
+        self.register_plugin(ChatRouterPlugin())
+
         curses.noecho()
         curses.cbreak()
 
@@ -50,23 +57,23 @@ class MudWindowSession:
     def write_to_main_window(self, text):
         pub.sendMessage('MainWindow.add_text', text=text)
         pub.sendMessage('InputWindow.refresh')
-    
+
+    def register_plugin(self, plugin):
+        for attr in dir(plugin):
+            attr = getattr(plugin, attr)
+            if hasattr(attr, 'muddy_plugin_flags'):
+                for flag, value in attr.muddy_plugin_flags.items():
+                    if value:
+                        self.plugin_registry[flag].append(plugin)
+
     def _route_incoming_text(self, text):
         if type(text) == str:
             text = [text]
         
         for line in text:
-            chat_rx = re.compile(r'^(\{chan ch=(?P<chan>.*?)\}|\{say\})(?P<text>.*)$')
-            chat_m = chat_rx.search(line)
-            if chat_m:
-                pub.sendMessage('ChatWindow.add_text', text=chat_m['text'])
-                continue
-
-            stats_rx = re.compile(r'^\{stats\}')
-            stats_m = stats_rx.search(line)
-            if stats_m:
-                pub.sendMessage('StatsWindow.set_text', text=[line])
-                continue
+            for plugin in self.plugin_registry['IncomingTextHandler']:
+                if plugin.handle(line):
+                    continue
 
             pub.sendMessage('MainWindow.add_text', text=line)
 
