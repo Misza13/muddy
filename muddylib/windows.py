@@ -69,7 +69,10 @@ class Window(LayoutElement):
         pass
 
     def put_text(self, y, x, text):
-        self.window.move(y ,x)
+        try:
+            self.window.move(y ,x)
+        except:
+            return
 
         pieces = re.split('\x1b\[(.*?)m', text)
         color_piece = False
@@ -88,10 +91,14 @@ class Window(LayoutElement):
                             color_num += color - 30
                     active_pair = curses.color_pair(color_num+1)
             else:
-                if active_pair:
-                    self.window.addstr(piece, active_pair)
-                else:
-                    self.window.addstr(piece)
+                try:
+                    if active_pair:
+                        self.window.addstr(piece, active_pair)
+                    else:
+                        self.window.addstr(piece)
+                except:
+                    #curses workaround
+                    pass
 
             color_piece = not color_piece
 
@@ -149,11 +156,14 @@ class StaticWindow(Window):
 
     def redraw(self):
         self.window.clear()
-        for line in self.buffer:
-            self.window.addstr(line)
+        for l, line in enumerate(self.buffer):
+            self.put_text(l, 0, line)
         self.window.refresh()
 
     def set_text(self, text):
+        if type(text) == str:
+            text = [text]
+
         self.buffer = text
         self.redraw()
 

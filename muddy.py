@@ -12,6 +12,7 @@ from muddylib.screen import MudScreen
 from muddylib.telnet import MudClientFactory, ConnectionKeeper
 
 from plugins.chat_router import ChatRouterPlugin
+from plugins.minimap_router import MinimapRouterPlugin
 
 
 class MudWindowSession:
@@ -21,6 +22,7 @@ class MudWindowSession:
         }
 
         self.register_plugin(ChatRouterPlugin())
+        self.register_plugin(MinimapRouterPlugin())
 
         curses.noecho()
         curses.cbreak()
@@ -71,11 +73,14 @@ class MudWindowSession:
             text = [text]
         
         for line in text:
+            routed = False
             for plugin in self.plugin_registry['IncomingTextHandler']:
                 if plugin.handle(line):
-                    continue
+                    routed = True
+                    break
 
-            pub.sendMessage('MainWindow.add_text', text=line)
+            if not routed:
+                pub.sendMessage('MainWindow.add_text', text=line)
 
         pub.sendMessage('InputWindow.refresh')
 

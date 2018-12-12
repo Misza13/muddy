@@ -7,7 +7,7 @@
     "elements": [
       {
         "type": "HorizontalStackLayout",
-        "layouts": ["2*", "1*", "1*"],
+        "layouts": ["2*", "30", "1*"],
         "elements": [
           {
             "type": "BufferedTextWindow",
@@ -15,7 +15,7 @@
           },
           {
             "type": "VerticalStackLayout",
-            "layouts": ["1*", "1*"],
+            "layouts": ["18", "1*"],
             "elements": [
               {
                 "type": "StaticWindow",
