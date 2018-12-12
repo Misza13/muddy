@@ -1,7 +1,10 @@
 import zlib
 
+from pubsub import pub
+
 from twisted.internet.protocol import ClientFactory
 from twisted.conch.telnet import Telnet
+
 
 class MudProtocol(Telnet):
     def __init__(self, recv_handler):
@@ -27,14 +30,14 @@ class MudProtocol(Telnet):
     def applicationDataReceived(self, data):
         data = data.decode()
         lines = [line.strip('\r') for line in data.split('\n')]
-        self.recv_handler(lines)
+        pub.sendMessage('Core.telnet_received', text=lines)
 
     def sendData(self, data):
         data += '\n'
         self.transport.write(data.encode('ascii'))
 
     def connectionLost(self, reason):
-        self.recv_handler('Connection lost: ' + str(reason))
+        pub.sendMessage('Core.telnet_received', text=['Connection lost: ' + str(reason)])
 
 
 class MudClientFactory(ClientFactory):

@@ -36,6 +36,7 @@ class MudWindowSession:
         self.input = InputWindow('InputWindow', x-2, y-2, 1, lambda t: self._input_handler(t))
         
         self.connection_keeper = ConnectionKeeper()
+        pub.subscribe(self._route_incoming_text, 'Core.telnet_received')
         
         self.app_running = True
 
@@ -83,7 +84,7 @@ class MudWindowSession:
         self.input.resize(x-2, y-2, 1)
 
     def write_to_main_window(self, text):
-        self._route_incoming_text(text)
+        pub.sendMessage('MainWindow.add_text', text=text)
         self.input.redraw()
     
     def _route_incoming_text(self, text):
@@ -116,7 +117,7 @@ class MudWindowSession:
             self.input.redraw()
         else:
             if not self.input.process_key(key):
-                self.write_to_main_window('Unhandled key: ' + str(key))
+                self.write_to_main_window('\x1b[36;1mUnhandled key: ' + str(key) + '\x1b[0m')
 
     def _escape_key_handler(self, key):
         if key == ord('q'):
@@ -125,10 +126,10 @@ class MudWindowSession:
             reactor.stop()
             return
 
-        self.write_to_main_window('Unhandled escape key: ' + str(key))
+        self.write_to_main_window('\x1b[36;1mUnhandled escape key: ' + str(key) + '\x1b[0m')
 
     def _input_handler(self, input_text):
-        self.write_to_main_window(input_text)
+        self.write_to_main_window('\x1b[33m' + input_text + '\x1b[0m')
         self.connection_keeper.send_data(input_text)
     
     def _handle_connection_created(self, proto):
