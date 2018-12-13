@@ -25,9 +25,8 @@ class MudWindowSession:
         
         self.plugin_manager = PluginManager()
 
-        self.plugin_manager.register_plugin(ChatRouterPlugin())
-        self.plugin_manager.register_plugin(MinimapRouterPlugin())
-        self.plugin_manager.register_plugin(AardwolfStatsPlugin())
+        plugin_config = json.loads(open('config/aardwolf_plugins.json', 'r').read())
+        self.plugin_manager.load_from_config(plugin_config)
 
         curses.noecho()
         curses.cbreak()

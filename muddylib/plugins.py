@@ -1,3 +1,5 @@
+import importlib
+
 from pubsub import pub
 
 
@@ -25,6 +27,20 @@ class PluginManager:
         self.handlers = {
             'IncomingTextHandler': []
         }
+    
+    def load_from_config(self, config):
+        #TODO: Plugin configuration (via constructor or dedicated method)
+        for plugin_def in config['plugins']:
+            module_name = plugin_def['module']
+            class_name = plugin_def['class']
+            
+            module = importlib.import_module(module_name)
+            for thing in dir(module):
+                if thing == class_name:
+                    plugin_class = getattr(module, class_name)
+                    plugin = plugin_class()
+                    
+                    self.register_plugin(plugin)
     
     def register_plugin(self, plugin):
         #TODO: Duplicate/de-/re-registration

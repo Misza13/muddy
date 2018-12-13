@@ -1,0 +1,18 @@
+{
+  "name": "aardwolf_plugins",
+  "description": "Standard plugin configuration for Aardwolf MUD",
+  "plugins": [
+    {
+      "module": "plugins.chat_router",
+      "class": "ChatRouterPlugin"
+    },
+    {
+      "module": "plugins.minimap_router",
+      "class": "MinimapRouterPlugin"
+    },
+    {
+      "module": "plugins.aardwolf_stats",
+      "class": "AardwolfStatsPlugin"
+    }
+  ]
+}
