@@ -1,11 +1,9 @@
 import re
 
-from pubsub import pub
-
-from muddylib.plugins import IncomingTextHandler
+from muddylib.plugins import MuddyPlugin, IncomingTextHandler
 
 
-class AardwolfStatsPlugin:
+class AardwolfStatsPlugin(MuddyPlugin):
     stats_rx = re.compile("""^(\{stats\})
         (?P<i_curr_str>\\d+)/(?P<i_base_str>\\d+),
         (?P<i_curr_int>\\d+)/(?P<i_base_int>\\d+),
@@ -33,7 +31,7 @@ class AardwolfStatsPlugin:
         stats_m = self.stats_rx.search(line)
         if stats_m:
             stats = StatsParser(stats_m)
-            pub.sendMessage('StatsWindow.set_text', text=[
+            self.invoke_method('StatsWindow', 'set_text', text=[
                 f'hp: {stats.curr_hp}/{stats.max_hp}',
                 f'mp: {stats.curr_mp}/{stats.max_mp}',
                 f'mv: {stats.curr_mv}/{stats.max_mv}',

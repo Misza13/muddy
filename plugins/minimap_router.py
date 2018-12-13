@@ -1,11 +1,9 @@
 import re
 
-from pubsub import pub
-
-from muddylib.plugins import IncomingTextHandler
+from muddylib.plugins import MuddyPlugin, IncomingTextHandler
 
 
-class MinimapRouterPlugin:
+class MinimapRouterPlugin(MuddyPlugin):
     def __init__(self):
         self.buffer = []
         self.collecting_map = False
@@ -16,9 +14,9 @@ class MinimapRouterPlugin:
             self.buffer = []
             self.collecting_map = True
             return True
-        elif re.search(r'^<MAPEND>$', line):
+        elif re.search(r'^(\x1b\[0;37m)?<MAPEND>$', line):
             self.collecting_map = False
-            pub.sendMessage('MinimapWindow.set_text', text=self.buffer)
+            self.invoke_method('MinimapWindow', 'set_text', text=self.buffer)
             return True
         elif self.collecting_map:
             self.buffer.append(line)
