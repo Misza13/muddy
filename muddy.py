@@ -13,6 +13,7 @@ from muddylib.telnet import MudClientFactory, ConnectionKeeper
 
 from plugins.chat_router import ChatRouterPlugin
 from plugins.minimap_router import MinimapRouterPlugin
+from plugins.aardwolf_stats import AardwolfStatsPlugin
 
 
 class MudWindowSession:
@@ -23,6 +24,7 @@ class MudWindowSession:
 
         self.register_plugin(ChatRouterPlugin())
         self.register_plugin(MinimapRouterPlugin())
+        self.register_plugin(AardwolfStatsPlugin())
 
         curses.noecho()
         curses.cbreak()
