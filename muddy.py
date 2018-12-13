@@ -118,10 +118,10 @@ class MudWindowSession:
             reactor.stop()
             return
 
-        self.write_to_main_window('\x1b[36;1mUnhandled escape key: ' + str(key) + '\x1b[0m')
+        self.write_to_main_window(clr.colorify(f'Unhandled escape key: {key}', clr.CYAN + clr.BRIGHT))
 
     def _input_handler(self, input_text):
-        self.write_to_main_window('\x1b[33m' + input_text + '\x1b[0m')
+        self.write_to_main_window(clr.colorify(input_text, clr.YELLOW))
         self.connection_keeper.send_data(input_text)
     
     def _handle_connection_created(self, proto):

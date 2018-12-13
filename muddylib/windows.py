@@ -4,6 +4,8 @@ import curses.ascii as asc
 
 from pubsub import pub
 
+import muddylib.colors as clr
+
 
 class LayoutElement(object):
     def __init__(self):
@@ -194,7 +196,7 @@ class InputWindow(Window):
         elif key >= 0 and key < 256:
             self.input_buffer += chr(key)
         else:
-            pub.sendMessage('MainWindow.add_text', text='\x1b[36;1mUnhandled key: ' + str(key) + '\x1b[0m')
+            pub.sendMessage('MainWindow.add_text', text=clr.colorify(f'Unhandled key: {key}', clr.CYAN + clr.BRIGHT))
             self.refresh()
             return
         
