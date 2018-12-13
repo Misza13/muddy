@@ -9,10 +9,13 @@ WHITE = 7
 
 BRIGHT = 8
 
-def colorify(text, color):
+RESET = '\x1b[0m'
+
+def color_seq(color):
     if color & BRIGHT:
-        ansi_color = f'\x1b[{(color & 7) + 30};1m'
+        return f'\x1b[{(color & 7) + 30};1m'
     else:
-        ansi_color = f'\x1b[{(color & 7) + 30}m'
-    
-    return ansi_color + text + '\x1b[0m'
+        return f'\x1b[{(color & 7) + 30}m'
+
+def colorify(text, color):
+    return color_seq(color) + text + RESET
