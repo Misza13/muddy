@@ -10,6 +10,7 @@ from twisted.internet import reactor
 
 from muddylib.screen import MudScreen
 from muddylib.telnet import MudClientFactory, ConnectionKeeper
+from muddylib.plugins import PluginManager
 
 from plugins.chat_router import ChatRouterPlugin
 from plugins.minimap_router import MinimapRouterPlugin
@@ -20,13 +21,11 @@ class MudWindowSession:
     def __init__(self, screen):
         self.logger = open('muddy.log', 'w+')
         
-        self.plugin_registry = {
-            'IncomingTextHandler': []
-        }
+        self.plugin_manager = PluginManager()
 
-        self.register_plugin(ChatRouterPlugin())
-        self.register_plugin(MinimapRouterPlugin())
-        self.register_plugin(AardwolfStatsPlugin())
+        self.plugin_manager.register_plugin(ChatRouterPlugin())
+        self.plugin_manager.register_plugin(MinimapRouterPlugin())
+        self.plugin_manager.register_plugin(AardwolfStatsPlugin())
 
         curses.noecho()
         curses.cbreak()
@@ -64,14 +63,6 @@ class MudWindowSession:
         pub.sendMessage('MainWindow.add_text', text=text)
         pub.sendMessage('InputWindow.refresh')
 
-    def register_plugin(self, plugin):
-        for attr in dir(plugin):
-            attr = getattr(plugin, attr)
-            if hasattr(attr, 'muddy_plugin_flags'):
-                for flag, value in attr.muddy_plugin_flags.items():
-                    if value:
-                        self.plugin_registry[flag].append(plugin)
-
     def _route_incoming_text(self, text):
         if type(text) == str:
             text = [text]
@@ -82,8 +73,8 @@ class MudWindowSession:
         
         for line in text:
             routed = False
-            for plugin in self.plugin_registry['IncomingTextHandler']:
-                if plugin.handle(line):
+            for handler in self.plugin_manager.get_handlers('IncomingTextHandler'):
+                if handler(line):
                     routed = True
                     break
 
