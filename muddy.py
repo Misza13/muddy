@@ -18,6 +18,8 @@ from plugins.aardwolf_stats import AardwolfStatsPlugin
 
 class MudWindowSession:
     def __init__(self, screen):
+        self.logger = open('muddy.log', 'w+')
+        
         self.plugin_registry = {
             'IncomingTextHandler': []
         }
@@ -73,6 +75,10 @@ class MudWindowSession:
     def _route_incoming_text(self, text):
         if type(text) == str:
             text = [text]
+        
+        for line in text:
+            self.logger.write(repr(line) + '\n')
+        self.logger.flush()
         
         for line in text:
             routed = False
