@@ -122,15 +122,12 @@ class BufferedTextWindow(Window):
     def add_text(self, text):
         self.buffer.append(text)
         if self.buffer_pos == 0:
-            self.draw_text(text)
+            self.window.scroll(1)
+            y, x = self.window.getmaxyx()
+            self.put_text(y-1, 0, text)
+            self.window.refresh()
         else:
             self.buffer_pos += 1
-
-    def draw_text(self, text):
-        self.window.scroll(1)
-        y, x = self.window.getmaxyx()
-        self.put_text(y-1, 0, text)
-        self.window.refresh()
 
     def redraw(self):
         y, x = self.window.getmaxyx()
@@ -140,7 +137,8 @@ class BufferedTextWindow(Window):
         first_row = last_row - y + 1
         for l in range(last_row - first_row + 1):
             if first_row+l >= 0:
-                self.put_text(l, 0, self.buffer[first_row+l])
+                self.window.scroll(1)
+                self.put_text(y-1, 0, self.buffer[first_row+l])
         self.window.refresh()
 
     def scroll(self, num_rows):
