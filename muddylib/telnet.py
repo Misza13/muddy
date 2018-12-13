@@ -53,6 +53,7 @@ class MudClientFactory(ClientFactory):
 class ConnectionKeeper:
     def __init__(self):
         self.connection = None
+        pub.subscribe(self.send_data, 'Telnet.send_data')
     
     def register(self, proto):
         self.connection = proto

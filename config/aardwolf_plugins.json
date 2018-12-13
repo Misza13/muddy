@@ -13,6 +13,35 @@
     {
       "module": "plugins.aardwolf_stats",
       "class": "AardwolfStatsPlugin"
+    },
+    {
+      "module": "plugins.auto_login",
+      "class": "AutoLoginPlugin",
+      "configuration": {
+        "credentials_file": "~/.muddy/aardwolf_credentials.json",
+        "sequence": [
+          {
+            "type": "expect",
+            "text": "What be thy name, adventurer? "
+          },
+          {
+            "type": "send",
+            "data": "$NAME"
+          },
+          {
+            "type": "expect_rx",
+            "pattern": "Existing profile loaded"
+          },
+          {
+            "type": "expect",
+            "text": "Password: "
+          },
+          {
+            "type": "send",
+            "data": "$PASSWORD"
+          }
+        ]
+      }
     }
   ]
 }

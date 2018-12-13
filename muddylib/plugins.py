@@ -4,6 +4,11 @@ from pubsub import pub
 
 
 class MuddyPlugin(object):
+    configuration = {}
+    
+    def set_configuration(self, config):
+        self.configuration = config
+    
     def invoke_method(self, component_name, method_name, **kwargs):
         pub.sendMessage(component_name + '.' + method_name, **kwargs)
 
@@ -29,7 +34,6 @@ class PluginManager:
         }
     
     def load_from_config(self, config):
-        #TODO: Plugin configuration (via constructor or dedicated method)
         for plugin_def in config['plugins']:
             module_name = plugin_def['module']
             class_name = plugin_def['class']
@@ -39,6 +43,8 @@ class PluginManager:
                 if thing == class_name:
                     plugin_class = getattr(module, class_name)
                     plugin = plugin_class()
+                    if 'configuration' in plugin_def:
+                        plugin.set_configuration(plugin_def['configuration'])
                     
                     self.register_plugin(plugin)
     
