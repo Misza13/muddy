@@ -1,3 +1,4 @@
+import traceback
 import threading
 import json
 
@@ -8,6 +9,7 @@ import curses.ascii as asc
 
 from twisted.internet import reactor
 
+import muddylib.colors as clr
 from muddylib.screen import MudScreen
 from muddylib.telnet import MudClientFactory, ConnectionKeeper
 from muddylib.plugins import PluginManager
@@ -74,9 +76,17 @@ class MudWindowSession:
         for line in text:
             routed = False
             for handler in self.plugin_manager.get_handlers('IncomingTextHandler'):
-                if handler(line):
-                    routed = True
-                    break
+                try:
+                    if handler(line):
+                        routed = True
+                        break
+                except:
+                    pub.sendMessage(
+                        'MainWindow.add_text',
+                        text=clr.colorify('Error occured when processing handler:', clr.RED + clr.BRIGHT))
+                    pub.sendMessage(
+                        'MainWindow.add_text',
+                        text=[clr.colorify(l, clr.RED + clr.BRIGHT) for l in traceback.format_exc().split('\n')])
 
             if not routed:
                 pub.sendMessage('MainWindow.add_text', text=line)

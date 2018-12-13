@@ -120,6 +120,11 @@ class BufferedTextWindow(Window):
         self.buffer_pos = 0
 
     def add_text(self, text):
+        if type(text) == list:
+            for chunk in text:
+                self.add_text(chunk)
+            return
+            
         self.buffer.append(text)
         if self.buffer_pos == 0:
             self.window.scroll(1)
