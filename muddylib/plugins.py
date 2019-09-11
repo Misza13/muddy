@@ -49,7 +49,7 @@ class PluginManager:
                     self.register_plugin(plugin)
     
     def register_plugin(self, plugin):
-        #TODO: Duplicate/de-/re-registration
+        # TODO: Duplicate/de-/re-registration
         self.plugins.append(plugin)
         
         for attr in dir(plugin):

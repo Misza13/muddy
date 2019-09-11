@@ -11,14 +11,22 @@ class MudProtocol(Telnet):
         super().__init__()
         self.decompress = zlib.decompressobj()
         self.negotiationMap[b'V'] = lambda data: self.compression_negotiated(data)
+        self.negotiationMap[b'\xC9'] = lambda data: self.gmcp(data)
         self.compression_enabled = False
 
     def telnet_WILL(self, option):
         if option == b'V':
             self.do(b'V')
+        elif option == b'\xC9':
+            self.do(b'\xC9')
 
     def compression_negotiated(self, data):
         self.compression_enabled = True
+
+    def gmcp(self, data):
+        with open('muddy-gmcp.log', 'a') as l:
+            l.write(repr(b''.join(data)) + '\n')
+            l.flush()
 
     def dataReceived(self, data):
         if self.compression_enabled:

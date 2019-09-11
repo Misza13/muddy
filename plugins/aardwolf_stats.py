@@ -4,7 +4,7 @@ from muddylib.plugins import MuddyPlugin, IncomingTextHandler
 
 
 class AardwolfStatsPlugin(MuddyPlugin):
-    stats_rx = re.compile("""^(\{stats\})
+    stats_rx = re.compile("""^({stats})
         (?P<i_curr_str>\\d+)/(?P<i_base_str>\\d+),
         (?P<i_curr_int>\\d+)/(?P<i_base_int>\\d+),
         (?P<i_curr_wis>\\d+)/(?P<i_base_wis>\\d+),

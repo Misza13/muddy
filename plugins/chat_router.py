@@ -2,8 +2,9 @@ import re
 
 from muddylib.plugins import MuddyPlugin, IncomingTextHandler
 
+
 class ChatRouterPlugin(MuddyPlugin):
-    chat_rx = re.compile(r'^(\{chan ch=(?P<chan>.*?)\}|\{say\}|\{tell\})(?P<text>.*)$')
+    chat_rx = re.compile(r'^({chan ch=(?P<chan>.*?)\}|{say}|{tell})(?P<text>.*)$')
     
     @IncomingTextHandler
     def handle(self, line):

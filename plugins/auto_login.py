@@ -35,7 +35,7 @@ class AutoLoginPlugin(MuddyPlugin):
                 break
     
     def handle_variables(self, data):
-        #TODO: Make this less crude
+        # TODO: Make this less crude
         if data == '$NAME':
             return self.read_credentials_file()['name']
         elif data == '$PASSWORD':

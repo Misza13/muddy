@@ -14,10 +14,6 @@ from muddylib.screen import MudScreen
 from muddylib.telnet import MudClientFactory, ConnectionKeeper
 from muddylib.plugins import PluginManager
 
-from plugins.chat_router import ChatRouterPlugin
-from plugins.minimap_router import MinimapRouterPlugin
-from plugins.aardwolf_stats import AardwolfStatsPlugin
-
 
 class MudWindowSession:
     def __init__(self, screen):
@@ -48,8 +44,10 @@ class MudWindowSession:
     def main_loop(self):
         f = MudClientFactory(lambda x: self._handle_connection_created(x))
         reactor.connectTCP('aardmud.org', 4000, f)
+
         def rrun():
             reactor.run(installSignalHandlers=0)
+
         r_thread = threading.Thread(target=rrun)
         r_thread.start()
         

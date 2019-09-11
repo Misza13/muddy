@@ -76,7 +76,7 @@ class Window(LayoutElement):
         except:
             return
 
-        pieces = re.split('\x1b\[(.*?)m', text)
+        pieces = re.split('\x1b\\[(.*?)m', text)
         color_piece = False
         active_pair = None
         for piece in pieces:
@@ -87,9 +87,9 @@ class Window(LayoutElement):
                     color_num = 0
                     colors = [int(c) for c in piece.split(';')]
                     for color in colors:
-                        if color == 1: #bold/bright
+                        if color == 1:  # bold/bright
                             color_num += 8
-                        elif color >= 30 and color <= 37: # standard 8 colors
+                        elif 30 <= color <= 37:  # standard 8 colors
                             color_num += color - 30
                     active_pair = curses.color_pair(color_num+1)
             else:
@@ -99,7 +99,7 @@ class Window(LayoutElement):
                     else:
                         self.window.addstr(piece)
                 except:
-                    #curses workaround
+                    # curses workaround
                     pass
 
             color_piece = not color_piece
@@ -193,7 +193,7 @@ class InputWindow(Window):
         elif key == curses.KEY_BACKSPACE or key == asc.DEL:
             if self.input_buffer:
                 self.input_buffer = self.input_buffer[:-1]
-        elif key >= 0 and key < 256:
+        elif 0 <= key < 256:
             self.input_buffer += chr(key)
         else:
             pub.sendMessage('MainWindow.add_text', text=clr.colorify(f'Unhandled key: {key}', clr.CYAN + clr.BRIGHT))
