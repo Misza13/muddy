@@ -23,7 +23,7 @@ class AardwolfStatsPlugin(MuddyPlugin):
         (?P<i_align>\\d+),
         (?P<i_tnl>\\d+),
         (?P<i_level>\\d+),
-        (?P<i_position>\\d+)
+        (?P<i_position_num>\\d+)
         $""", re.VERBOSE)
     
     @IncomingTextHandler
@@ -32,9 +32,13 @@ class AardwolfStatsPlugin(MuddyPlugin):
         if stats_m:
             stats = StatsParser(stats_m)
             self.invoke_method('StatsWindow', 'set_text', text=[
-                f'hp: {stats.curr_hp}/{stats.max_hp}',
-                f'mp: {stats.curr_mp}/{stats.max_mp}',
-                f'mv: {stats.curr_mv}/{stats.max_mv}',
+                f'H: {stats.curr_hp}/{stats.max_hp}',
+                f'M: {stats.curr_mp}/{stats.max_mp}',
+                f'V: {stats.curr_mv}/{stats.max_mv}',
+                '',
+                f'E: {stats.enemy_pct}' if stats.enemy_pct < 9999 else '',
+                '',
+                stats.position
                 ])
             return True
 
@@ -46,7 +50,7 @@ class StatsParser:
         self.data = {}
         for k, v in match.groupdict().items():
             if k.startswith('i_'):
-                self.data[k[2:]] = v
+                self.data[k[2:]] = int(v)
             else:
                 self.data[k] = v
     
