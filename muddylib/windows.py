@@ -173,6 +173,16 @@ class StaticWindow(Window):
         self.redraw()
 
 
+DIRECTION_MAP = {
+    'W': 'north',
+    'S': 'south',
+    'A': 'west',
+    'D': 'east',
+    'Q': 'down',
+    'E': 'up'
+}
+
+
 class InputWindow(Window):
     def __init__(self):
         super(InputWindow, self).__init__()
@@ -193,6 +203,10 @@ class InputWindow(Window):
         elif key == curses.KEY_BACKSPACE or key == asc.DEL:
             if self.input_buffer:
                 self.input_buffer = self.input_buffer[:-1]
+        elif chr(key) in DIRECTION_MAP:
+            # TODO: This belongs as a plugin (i.e.: allow interception of user keys)
+            pub.sendMessage('Core.user_input_received', input_text=DIRECTION_MAP[chr(key)])
+            return
         elif 0 <= key < 256:
             self.input_buffer += chr(key)
         else:
