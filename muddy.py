@@ -1,6 +1,5 @@
 import traceback
 import threading
-import json
 
 from pubsub import pub
 
@@ -13,6 +12,7 @@ import muddylib.colors as clr
 from muddylib.screen import MudScreen
 from muddylib.telnet import MudClientFactory, ConnectionKeeper
 from muddylib.plugins import PluginManager
+from muddylib.yaml import load as yload
 
 
 class MudWindowSession:
@@ -21,7 +21,7 @@ class MudWindowSession:
         
         self.plugin_manager = PluginManager()
 
-        plugin_config = json.loads(open('config/aardwolf_plugins.json', 'r').read())
+        plugin_config = yload(open('config/aardwolf_plugins.yml', 'r').read())
         self.plugin_manager.load_from_config(plugin_config)
 
         curses.noecho()
@@ -32,7 +32,7 @@ class MudWindowSession:
             curses.init_pair(c+1, c, curses.COLOR_BLACK)
 
         self.screen = screen
-        screen_config = json.loads(open('config/aardwolf_windows.json', 'r').read())
+        screen_config = yload(open('config/aardwolf_windows.yml', 'r').read())
         self.mud_screen = MudScreen(screen, screen_config)
         
         self.connection_keeper = ConnectionKeeper()

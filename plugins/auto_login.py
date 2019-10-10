@@ -1,8 +1,8 @@
 import os
 import re
-import json
 
 from muddylib.plugins import MuddyPlugin, IncomingTextHandler
+from muddylib.yaml import load as yload
 
 
 class AutoLoginPlugin(MuddyPlugin):
@@ -46,5 +46,5 @@ class AutoLoginPlugin(MuddyPlugin):
     def read_credentials_file(self):
         p = os.path.expanduser(self.configuration['credentials_file'])
         f = open(p, 'r')
-        c = json.loads(f.read())
+        c = yload(f.read())
         return c
