@@ -125,11 +125,7 @@ class MudWindowSession:
         self.connection_keeper.register(proto)
 
 
-def main(screen):
+def session_main(screen):
     sess = MudWindowSession(screen)
 
     sess.main_loop()
-
-
-if __name__ == '__main__':
-    curses.wrapper(main)
